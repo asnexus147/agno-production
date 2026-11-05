@@ -1,0 +1,6 @@
+agno[os]
+uvicorn[standard]
+python-dotenv
+openai
+yfinance
+sqlalchemy
