@@ -15,8 +15,8 @@ db = SqliteDb(
 
 #load_dotenv()
 
-openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
-if not openrouter_api_key:
+api_key = os.getenv("OPENROUTER_API_KEY")
+if not api_key:
     raise RuntimeError(
         "OPENROUTER_API_KEY is missing. Add your OpenRouter API key to the "
         "environment or to a .env file in the project directory."
@@ -26,7 +26,7 @@ news_agent = Agent(
     id="news_agent",
     model=OpenRouter(
         id="openrouter/free",
-        api_key=openrouter_api_key,
+        api_key=api_key,
     ),
     cache_session=True,
     add_history_to_context=True,
@@ -41,7 +41,7 @@ finance_agent = Agent(
     id="finance_agent",
     model=OpenRouter(
         id="openrouter/free",
-        api_key=openrouter_api_key,
+        api_key=api_key,
     ),
     cache_session=True,
     add_history_to_context=True,
@@ -57,7 +57,7 @@ team = Team(
     members=[news_agent, finance_agent],
     model=OpenRouter(
         id="openrouter/free",
-        api_key=openrouter_api_key,
+        api_key=api_key,
     ),
     id="research-team",
     instructions="Delega all'agente appropriato in base alla richiesta."
