@@ -8,18 +8,18 @@ from agno.tools.hackernews import HackerNewsTools
 from agno.tools.yfinance import YFinanceTools
 from pathlib import Path
 from agno.db.sqlite import SqliteDb
+from fastapi import FastAPI
 
-db = SqliteDb(
-    db_file=str(Path(__file__).resolve().parent / "agno_sessions.db")
-)
+data_dir = Path(os.getenv("DATA_DIR", "/data"))
+data_dir.mkdir(parents=True, exist_ok=True)
 
+db = SqliteDb(db_file=str(data_dir / "agno_sessions.db"))
 #load_dotenv()
 
 api_key = os.getenv("OPENROUTER_API_KEY")
 if not api_key:
     raise RuntimeError(
-        "OPENROUTER_API_KEY is missing. Add your OpenRouter API key to the "
-        "environment or to a .env file in the project directory."
+        "OPENROUTER_API_KEY is missing."
     )
 
 news_agent = Agent(
@@ -62,20 +62,25 @@ team = Team(
     id="research-team",
     instructions="Delega all'agente appropriato in base alla richiesta."
 )
+allowed_origins = [
+    origin.strip()
+    for origin in os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
+    if origin.strip()
+]
+
 agent_os = AgentOS(
     teams=[team],
     agents=[news_agent, finance_agent],
-    cors_allowed_origins=[
-        "http://localhost:3000",       # Esempio: frontend locale
-        "https://tuo-frontend.vercel.app",  # Sostituisci col dominio reale
-    #    "https://os.agno.com",         # Solo se usi la UI di AgentOS
-    ],
+    cors_allowed_origins=allowed_origins
 )
 
 app = agent_os.get_app()
 
-#App FastAPI - Esecuzione del backend [utile per il debugging e lo sviluppo locale]
+@app.get("/health")
+def health():
+    return {"status": "ok"}
 
+#App FastAPI - Esecuzione del backend [utile per il debugging e lo sviluppo locale]
 
 #if __name__ == "__main__":
 #    agent_os.serve(app="lez11_production:app", reload=True)
